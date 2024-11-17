@@ -7,27 +7,31 @@ import jakarta.servlet.http.HttpServletResponse;
 import kopo.poly.auth.AuthInfo;
 import kopo.poly.auth.JwtTokenProvider;
 import kopo.poly.auth.JwtTokenType;
+import kopo.poly.controller.response.CommonResponse;
 import kopo.poly.dto.MsgDTO;
 import kopo.poly.dto.UserInfoDTO;
 import kopo.poly.util.CmmUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
+
 @CrossOrigin(origins = {"http://localhost:13000", "http://localhost:14000"},
-                allowedHeaders = {"POST, GET"},
-                allowCredentials = "true")
+        allowCredentials = "true",
+        allowedHeaders = {"Content-Type"},
+        methods = {RequestMethod.POST, RequestMethod.GET},
+        originPatterns = {"login/**"}
+)
 @Tag(name = "로그인 관련 API", description = "로그인 관련 API 설명입니다.")
 @Slf4j
-@RequestMapping(value = "/login")
+@RequestMapping(value = "/login/v1")
 @RequiredArgsConstructor
 @RestController
 public class LoginController {
@@ -47,20 +51,20 @@ public class LoginController {
     private final JwtTokenProvider jwtTokenProvider;
 
     @Operation(summary = "로그인 성공처리 API", description = "로그인 성공처리 API",
-                    responses = {
-                            @ApiResponse(responseCode = "200", description = "OK"),
-                            @ApiResponse(responseCode = "404", description = "Page Not Found !")
-                    }
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "OK"),
+                    @ApiResponse(responseCode = "404", description = "Page Not Found!"),
+            }
     )
     @PostMapping(value = "loginSuccess")
-    public MsgDTO loginSuccess(@AuthenticationPrincipal AuthInfo authInfo,
-                               HttpServletResponse response) {
+    public ResponseEntity<CommonResponse> loginSuccess(@AuthenticationPrincipal AuthInfo authInfo,
+                                                       HttpServletResponse response) {
 
-        log.info(this.getClass().getName() + ".loginSuccess Start !");
+        log.info(this.getClass().getName() + ".loginSuccess Start!");
 
         // Spring Security에 저장된 정보 가져오기
         UserInfoDTO rDTO = Optional.ofNullable(authInfo.userInfoDTO())
-                        .orElseGet(() -> UserInfoDTO.builder().build());
+                .orElseGet(() -> UserInfoDTO.builder().build());
 
         String userId = CmmUtil.nvl(rDTO.userId());
         String userName = CmmUtil.nvl(rDTO.userName());
@@ -69,22 +73,22 @@ public class LoginController {
         log.info("userId : " + userId);
         log.info("userName : " + userName);
         log.info("userRoles : " + userRoles);
-        
+
         // Access Token 생성
         String accessToken = jwtTokenProvider.createToken(userId, userRoles, JwtTokenType.ACCESS_TOKEN);
         log.info("accessToken : " + accessToken);
 
 
         ResponseCookie cookie = ResponseCookie.from(accessTokenName, accessToken)
-                        .domain("localhost")
-                                .path("/")
-//                                .secure(true)
-//                                .sameSite("None")
-                                .maxAge(accessTokenValidTime) // JWT Refresh Token 만료시간 설정
-                                .httpOnly(true)
-                                .build();
+                .domain("localhost")
+                .path("/")
+//                .secure(true)
+//                .sameSite("None")
+                .maxAge(accessTokenValidTime) // JWT Refresh Token 만료시간 설정
+                .httpOnly(true)
+                .build();
 
-        // 기존 쿠키 모두 삭제하고, Cookie에 Access Token 저장하기
+        // 기존 쿠기 모두 삭제하고, Cookie에 Access Token 저장하기
         response.setHeader("Set-Cookie", cookie.toString());
 
         cookie = null;
@@ -99,41 +103,46 @@ public class LoginController {
         log.info("refreshToken : " + refreshToken);
 
         cookie = ResponseCookie.from(refreshTokenName, refreshToken)
-                                .domain("localhost")
-                                .path("/")
-                //                                .secure(true)
-                //                                .sameSite("None")
-                                .maxAge(refreshTokenValidTime) // JWT Refresh Token 만료시간 설정
-                                .httpOnly(true)
-                                .build();
+                .domain("localhost")
+                .path("/")
+//                .secure(true)
+//                .sameSite("None")
+                .maxAge(refreshTokenValidTime) // JWT Refresh Token 만료시간 설정
+                .httpOnly(true)
+                .build();
 
-        // 기존 쿠키에 Refresh Token 저장하기
+//         기존 쿠기에 Refresh Token 저장하기
         response.addHeader("Set-Cookie", cookie.toString());
 
         // 결과 메시지 전달하기
         MsgDTO dto = MsgDTO.builder().result(1).msg(userName + "님 로그인이 성공하였습니다.").build();
 
-        log.info(this.getClass().getName() + ".loginSuccess End !");
+        log.info(this.getClass().getName() + ".loginSuccess End!");
 
-        return dto;
+        return ResponseEntity.ok(
+                CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), dto));
+
     }
 
-    @Operation(summary = "로그인 실패처리 API", description = "로그인 실패처리 API",
-                    responses = {
-                            @ApiResponse(responseCode = "200", description = "OK"),
-                            @ApiResponse(responseCode = "404", description = "Page Not Found !"),
-                    }
+    @Operation(summary = "로그인 실패처리  API", description = "로그인 실패처리 API",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "OK"),
+                    @ApiResponse(responseCode = "404", description = "Page Not Found!"),
+            }
     )
     @PostMapping(value = "loginFail")
-    public MsgDTO loginFail() {
+    public ResponseEntity<CommonResponse> loginFail() {
 
-        log.info(this.getClass().getName() + ".loginFail Start !");
+        log.info(this.getClass().getName() + ".loginFail Start!");
 
-        // 결과 메시지 출력하기
+        // 결과 메시지 전달하기
         MsgDTO dto = MsgDTO.builder().result(1).msg("로그인이 실패하였습니다.").build();
 
-        log.info(this.getClass().getName() + ".loginFail End !");
+        log.info(this.getClass().getName() + ".loginFail End!");
 
-        return dto;
+        return ResponseEntity.ok(
+                CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), dto));
+
     }
+
 }

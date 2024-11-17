@@ -12,14 +12,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
-  * @param userInfoDTO 로그인된 사용자 정보 UserInfoRepository로부터 조회된 정보를 저장하기 위한 객체
-  */
+ * @param userInfoDTO 로그인된 사용자 정보 UserInfoRepository로부터 조회된 정보를 저장하기 위한 객체
+ */
 @Slf4j
 public record AuthInfo(UserInfoDTO userInfoDTO) implements UserDetails {
 
     /**
-      * 로그인한 사용자의 권한 부여하기
-      */
+     * 로그인한 사용자의 권한 부여하기
+     */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
@@ -28,7 +28,7 @@ public record AuthInfo(UserInfoDTO userInfoDTO) implements UserDetails {
         String roles = CmmUtil.nvl(userInfoDTO.roles());
 
         log.info("getAuthorities / roles : " + roles);
-        if (roles.length() > 0) { // DB에 저장된 Role이 있는 경우에만 실행
+        if (roles.length() > 0) { //DB에 저장된 Role이 있는 경우에만 실행
             for (String role : roles.split(",")) {
                 pSet.add(new SimpleGrantedAuthority(role));
 
@@ -39,16 +39,19 @@ public record AuthInfo(UserInfoDTO userInfoDTO) implements UserDetails {
     }
 
     /**
-      * 사용자의 id를 반환 (unique한 값)
-      */
+     * 사용자의 id를 반환 (unique한 값)
+     */
     @Override
     public String getUsername() {
-        return CmmUtil.nvl(userInfoDTO.userName());
+        return CmmUtil.nvl(userInfoDTO.userId());
+
     }
 
     // 사용자의 password를 반환
     @Override
-    public String getPassword() { return CmmUtil.nvl(userInfoDTO.password()); }
+    public String getPassword() {
+        return CmmUtil.nvl(userInfoDTO.password());
+    }
 
     // 계정 만료 여부 반환
     @Override

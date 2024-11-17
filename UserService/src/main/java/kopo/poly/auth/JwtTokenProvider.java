@@ -12,18 +12,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 @Slf4j
 @RefreshScope
@@ -48,7 +41,7 @@ public class JwtTokenProvider {
 
     @Value("${jwt.token.refresh.name}")
     private String refreshTokenName;
-    
+
     public static final String HEADER_PREFIX = "Bearer "; // Bearer 토큰 사용을 위한 선언 값
 
     /**
@@ -104,8 +97,7 @@ public class JwtTokenProvider {
      */
     public TokenDTO getTokenInfo(String token) {
 
-        log.
-                info(this.getClass().getName() + ".getTokenInfo Start !");
+        log.info(this.getClass().getName() + ".getTokenInfo Start !");
 
         // 보안키 문자들을 JWT Key 형태로 변경하기
         SecretKey secret = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));

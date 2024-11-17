@@ -8,7 +8,6 @@ import kopo.poly.repository.entity.UserInfoEntity;
 import kopo.poly.service.IUserInfoSsService;
 import kopo.poly.util.CmmUtil;
 import kopo.poly.util.DateUtil;
-import kopo.poly.util.EncryptUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -41,7 +40,7 @@ public class UserInfoSsService implements IUserInfoSsService {
      */
     @Override
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
-        log.info(this.getClass().getName() + ".loadUserByUsername Start !");
+        log.info(this.getClass().getName() + ".loadUserByUsername Start!");
 
         // 로그인 요청한 사용자 아이디를 검색함
         // SELECT * FROM USER_INFO WHERE USER_ID = 'hglee67'
@@ -58,7 +57,7 @@ public class UserInfoSsService implements IUserInfoSsService {
     @Override
     public int insertUserInfo(UserInfoDTO pDTO) {
 
-        log.info(this.getClass().getName() + ".insertUserInfo Start !");
+        log.info(this.getClass().getName() + ".insertUserInfo Start!");
 
         int res = 0; // 회원가입 성공 : 1, 아이디 중복으로인한 가입 취소 : 2, 기타 에러 발생 : 0
 
@@ -115,7 +114,7 @@ public class UserInfoSsService implements IUserInfoSsService {
             }
         }
 
-        log.info(this.getClass().getName() + ".insertUserInfo End !");
+        log.info(this.getClass().getName() + ".insertUserInfo End!");
 
         return res;
     }
@@ -123,7 +122,7 @@ public class UserInfoSsService implements IUserInfoSsService {
     @Override
     public UserInfoDTO getUserInfo(UserInfoDTO pDTO) throws Exception {
 
-        log.info(this.getClass().getName() + ".getUserInfo Start !");
+        log.info(this.getClass().getName() + ".getUserInfo Start!");
 
         // 회원아이디
         String user_id = CmmUtil.nvl(pDTO.userId());
@@ -138,22 +137,24 @@ public class UserInfoSsService implements IUserInfoSsService {
         // 값이 존재한다면..
         if (rEntity.isPresent()) {
 
-            // Entity -> DTO로 변경
-            // DB 저장된 암호화된 Email 값을 복호화해서 DTO에 저장하기 위해 ObjectMapper 사용 안함
-            rDTO = UserInfoDTO.builder()
-                    .userId(CmmUtil.nvl(rEntity.get().getUserId()))
-                    .userName(CmmUtil.nvl(rEntity.get().getUserName()))
+            rDTO = UserInfoDTO.from(rEntity.get());
 
-                    // 이메일 주소를 복호화해서 Record 저장하기
-                    .email(EncryptUtil.decAES128CBC(CmmUtil.nvl(rEntity.get().getEmail())))
-                    .addr1(CmmUtil.nvl(rEntity.get().getAddr1()))
-                    .addr2(CmmUtil.nvl(rEntity.get().getAddr2()))
-                    .roles(rEntity.get().getRoles())
-                    .build();
+//            // Entity -> DTO로 변경
+//            // DB 저장된 암호화된 Email 값을 복호화해서 DTO에 저장하기 위해 ObjectMapper 사용 안함
+//            rDTO = UserInfoDTO.builder()
+//                    .userId(CmmUtil.nvl(rEntity.get().getUserId()))
+//                    .userName(CmmUtil.nvl(rEntity.get().getUserName()))
+//
+//                    // 이메일 주소를 복호화해서 Record 저장하기
+//                    .email(EncryptUtil.decAES128CBC(CmmUtil.nvl(rEntity.get().getEmail())))
+//                    .addr1(CmmUtil.nvl(rEntity.get().getAddr1()))
+//                    .addr2(CmmUtil.nvl(rEntity.get().getAddr2()))
+//                    .roles(rEntity.get().getRoles())
+//                    .build();
 
         }
 
-        log.info(this.getClass().getName() + ".getUserInfo End !");
+        log.info(this.getClass().getName() + ".getUserInfo End!");
 
         return rDTO;
     }
