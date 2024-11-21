@@ -5,7 +5,7 @@ import kopo.poly.auth.AuthInfo;
 import kopo.poly.dto.UserInfoDTO;
 import kopo.poly.repository.UserInfoRepository;
 import kopo.poly.repository.entity.UserInfoEntity;
-import kopo.poly.service.IUserInfoSsService;
+import kopo.poly.service.IUserInfoService;
 import kopo.poly.util.CmmUtil;
 import kopo.poly.util.DateUtil;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class UserInfoSsService implements IUserInfoSsService {
+public class UserInfoService implements IUserInfoService {
 
     // RequiredArgsConstructor 어노테이션으로 생성자를 자동 생성함
     // userInfoRepository 변수에 이미 메모리에 올라간 UserInfoRepository 객체를 넣어줌

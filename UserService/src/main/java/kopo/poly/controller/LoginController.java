@@ -50,7 +50,7 @@ public class LoginController {
 
     private final JwtTokenProvider jwtTokenProvider;
 
-    @Operation(summary = "로그인 성공처리 API", description = "로그인 성공처리 API",
+    @Operation(summary = "로그인 성공처리  API", description = "로그인 성공처리 API",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Page Not Found!"),

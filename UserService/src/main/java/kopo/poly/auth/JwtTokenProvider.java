@@ -1,6 +1,9 @@
 package kopo.poly.auth;
 
-import io.jsonwebtoken.*;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
@@ -45,18 +48,19 @@ public class JwtTokenProvider {
     public static final String HEADER_PREFIX = "Bearer "; // Bearer 토큰 사용을 위한 선언 값
 
     /**
-     * JWT 토큰 ( Access Token, Refresh Token ) 생성
+     * JWT 토큰(Access Token, Refresh Token)생성
      *
-     * @param userId       회원 아이디 ( ex. hglee67)
-     * @param roles          회원 권한
+     * @param userId    회원 아이디(ex. hglee67)
+     * @param roles     회원 권한
      * @param tokenType token 유형
-     * @return 인증 처리한 정보 ( 로그인 성공, 실패 )
+     * @return 인증 처리한 정보(로그인 성공, 실패)
      */
     public String createToken(String userId, String roles, JwtTokenType tokenType) {
 
-        log.info(this.getClass().getName() + ".createToken Start !");
+        log.info(this.getClass().getName() + ".createToken Start!");
 
         log.info("userId : " + userId);
+
 
         long validTime = 0;
 
@@ -75,7 +79,7 @@ public class JwtTokenProvider {
         claims.put("roles", roles); // JWT Paylaod에 정의된 기본 옵션 외 정보를 추가 - 사용자 권한 추가
         Date now = new Date();
 
-        log.info(this.getClass().getName() + ".createToken End !");
+        log.info(this.getClass().getName() + ".createToken End!");
 
         // 보안키 문자들을 JWT Key 형태로 변경하기
         SecretKey secret = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
@@ -85,19 +89,19 @@ public class JwtTokenProvider {
                 .setClaims(claims) // 정보 저장
                 .setIssuedAt(now) // 토큰 발행 시간 정보
                 .setExpiration(new Date(now.getTime() + (validTime * 1000))) // set Expire Time
-                .signWith(secret, SignatureAlgorithm.HS256) // 사용할 암호화 알고리즘
+                .signWith(secret, SignatureAlgorithm.HS256)  // 사용할 암호화 알고리즘과
                 .compact();
     }
 
     /**
-     * JWT 토큰 ( Access Token, Refresh Token ) 에 저장된 값 가져오기
+     * JWT 토큰(Access Token, Refresh Token)에 저장된 값 가져오기
      *
      * @param token 토큰
-     * @return 회원 아이디 ( ex. hglee67 )
+     * @return 회원 아이디(ex. hglee67)
      */
     public TokenDTO getTokenInfo(String token) {
 
-        log.info(this.getClass().getName() + ".getTokenInfo Start !");
+        log.info(this.getClass().getName() + ".getTokenInfo Start!");
 
         // 보안키 문자들을 JWT Key 형태로 변경하기
         SecretKey secret = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
@@ -114,24 +118,21 @@ public class JwtTokenProvider {
         // TokenDTO는 자바17의 Record 객체 사용했기에 빌더패턴 적용함
         TokenDTO rDTO = TokenDTO.builder().userId(userId).role(role).build();
 
-        log.info(this.getClass().getName() + ".getTokenInfo End !");
+        log.info(this.getClass().getName() + ".getTokenInfo End!");
 
         return rDTO;
     }
 
     /**
-     * 쿠키에 및 인증헤더 ( Bearer ) 저장된 JWT 토큰 ( Access Token, Refresh Token ) 가져오기
+     * 쿠기 및 인증해더(Bearer) 저장된 JWT 토큰(Access Token, Refresh Token) 가져오기
      *
-     * 쿠키 : Access Token, Refresh Token 저장됨
-     * HTTP 인증 헤더 : Bearer 토큰으로 Access Token만 저장됨
-     *
-     * @param request request 정보
+     * @param request   request 정보
      * @param tokenType token 유형
-     * @return 쿠키에 저장된 토큰 값
+     * @return 쿠기에 저장된 토큰 값
      */
     public String resolveToken(HttpServletRequest request, JwtTokenType tokenType) {
 
-        log.info(this.getClass().getName() + ".resolveToken Start !");
+        log.info(this.getClass().getName() + ".resolveToken Start!");
 
         String tokenName = "";
 
@@ -172,8 +173,7 @@ public class JwtTokenProvider {
 
         }
 
-        log.info(this.getClass().getName() + ".resolveToken End !");
-
+        log.info(this.getClass().getName() + ".resolveToken End!");
         return token;
     }
 

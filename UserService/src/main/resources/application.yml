@@ -1,0 +1,17 @@
+### Local ###
+spring:
+  config:
+    import: "optional:configserver:http://localhost:8888/"
+  cloud:
+    config:
+      name: user
+      profile: prod
+
+### Kubernetes ###
+#spring:
+#  config:
+#    import: "optional:configserver:http://${CONFIG_SERVICE_IP}:${CONFIG_SERVICE_PORT}/"
+#  cloud:
+#    config:
+#      name: user
+#      profile: prod
